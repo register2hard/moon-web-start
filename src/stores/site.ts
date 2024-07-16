@@ -12,9 +12,10 @@ export const useSiteStore = defineStore('site', () => {
   const websitePreference = computed(() => settingStore.settings.websitePreference as WebsitePreference)
 
   const preferredPresetData = computed(() => firstPreferredLanguage.value === 'zh-CN' ? preset.data : globalPreset.data)
+  const clonePreferredPresetData = deepClone(preferredPresetData.value)
 
   // Custom data
-  const customData = ref<Category[]>(loadData() || [])
+  const customData = ref<Category[]>(loadData() || clonePreferredPresetData)
   watch(customData, () => {
     cachingData()
   }, { deep: true })
@@ -27,10 +28,6 @@ export const useSiteStore = defineStore('site', () => {
       return globalPreset.data
     if (websitePreference.value === 'Auto')
       return preferredPresetData.value
-
-    // ? init custom data
-    if (websitePreference.value === 'Customize' && customData.value.length === 0)
-      customData.value = deepClone(data.value)
     return customData.value
   })
 
@@ -87,7 +84,7 @@ export const useSiteStore = defineStore('site', () => {
      * So that users can select other presets for customize after restoring the data
      */
     settingStore.setSettings({ websitePreference: 'Auto' })
-    setData([])
+    setData(clonePreferredPresetData)
     localStorage.removeItem('cache')
   }
 
