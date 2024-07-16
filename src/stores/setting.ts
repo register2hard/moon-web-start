@@ -18,10 +18,7 @@ export const useSettingStore = defineStore('setting', () => {
   const isSetting = ref(false)
 
   watch(route, () => {
-    if (route.name === 'setting')
-      isSetting.value = true
-    else
-      isSetting.value = false
+    isSetting.value = route.name === 'setting'
   }, { immediate: true })
 
   const settingCache = loadSettings()
@@ -37,7 +34,7 @@ export const useSettingStore = defineStore('setting', () => {
     Object.keys(settings).forEach((key) => {
       if (!defaultSetting[key as SettingKey])
         return
-      if (!settingData[key as SettingKey]?.children.find(item => item.key === settings[key as SettingKey]))
+      if (![...settingData[key as SettingKey]?.children].find(item => item.key === settings[key as SettingKey]))
         settings[key as SettingKey] = settingData[key as SettingKey].defaultKey
     })
     return settings
@@ -47,7 +44,7 @@ export const useSettingStore = defineStore('setting', () => {
   }, { deep: true })
 
   function getSettingItem(key: keyof typeof settingData) {
-    return settingData[key].children.find(item => item.key === settings[key])!
+    return [...settingData[key].children].find(item => item.key === settings[key])!
   }
   function getSettingValue(key: keyof typeof settingData) {
     return getSettingItem(key).value
